@@ -1,0 +1,3 @@
+- `lab5-clone-1`: 14.54 seconds.
+- `lab5-clone-2`: 19.83 seconds.
+- `lab5-clone-3`: 14.84 seconds.

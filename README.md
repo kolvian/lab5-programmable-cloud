@@ -107,3 +107,55 @@ After completing this assignment, you should be able to:
 * Understand how IAM permissions control what an application running in the cloud can do.
 * Use one cloud-hosted application to programmatically create additional cloud resources.
 
+
+## Running the completed programs
+
+Install the Python dependencies in a virtual environment and authenticate:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+gcloud auth application-default login
+export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+```
+
+Run the parts in order from this repository's root:
+
+```bash
+.venv/bin/python part1/part1.py --machine-type e2-micro
+.venv/bin/python part2/part2.py --machine-type e2-micro
+.venv/bin/python part3/part3.py --machine-type e2-micro --credentials /path/to/service-credentials.json
+```
+
+Part 2 writes measured results to `part2/TIMING.md`. Creation timing ends after
+VM creation and network tagging complete. Application readiness timing ends
+after both `/hello` and the blog index respond successfully.
+
+Part 3 uses an explicit service account with Compute Admin and Service Account
+User permissions as described in its instructions. Keep its JSON key outside
+this repository. Only the launcher receives the key; the Flask child does not.
+
+The default machine type is `f1-micro`. Each program accepts
+`--machine-type e2-micro` if capacity is unavailable and the assignment permits
+an e2 machine. The commands above use the approved e2-micro alternative because
+Google Cloud rejected f1-micro creation in this zone with
+`ZONE_RESOURCE_POOL_EXHAUSTED`. All instances use `us-west1-b` and Ubuntu 22.04.
+
+The Flask service starts automatically after reboots, including on cloned VMs.
+The startup script initializes the database only when it does not already exist.
+Run `.venv/bin/python check.py` for the local configuration and operation checks.
+
+### Verification results
+
+All three parts were run successfully in `csci5942-a1-ep-20260903` with
+`e2-micro` instances in `us-west1-b`. The source VM, all three clones, and the
+Part 3 child passed live registration, login, access-control, and blog-creation
+checks. The source blog post survived the snapshot and appeared on all clones.
+Google Cloud's insert-operation record identifies the explicit service account
+as the creator of `lab5-child`; that child received only its startup script,
+with no credential metadata. Measured clone times are in `part2/TIMING.md`.
+
+After verification, all six lab VMs and their boot disks, the snapshot, custom
+image, firewall rule, and temporary service account were removed. The
+service-account key was revoked and its local file deleted. The capacity retry
+is paused. Recreate the service account and key before running Part 3 again.
